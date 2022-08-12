@@ -62,7 +62,7 @@ def extractCategories(s):
     return cats;
 
 
-def expandURI(prefix, prefixUri):
+def expandURI(prefix, prefixUri, prefixCount):
     preSplit = prefixUri.split(':');
 
     if len(preSplit) != 2:
@@ -71,8 +71,30 @@ def expandURI(prefix, prefixUri):
     if not preSplit[0] in prefix:
         raise Exception("Missing prefix: " + preSplit[0]);
 
+    prefixCount[preSplit[0]] = prefixCount[preSplit[0]] + 1;
     return prefix[preSplit[0]] + preSplit[1];
 
+
+def getCSVFile(path):
+    files = [];
+    for file in os.listdir(path):
+        filepath = os.path.join(path, file);
+        print(filepath);
+        if os.path.isfile(filepath):
+            if not file.startswith("~$") and file.endswith(".xlsx"):
+                files.append(filepath);
+
+    if len(files) == 0:
+        raise Exception("Couldn't find any csv files at " + str(path));
+
+    if len(files) > 1:
+        raise Exception("Found multiple files " + str(files));
+
+    return files[0];
+
+def getListOfVars(strData):
+    vars = strData.split(',');
+    return [x.strip() for x in vars];
 
 # For each SDD & DD get the latest paths and names
 dataset = []; # [{name, dd, sdd, version}]
@@ -96,14 +118,10 @@ for study in os.listdir(dataDir): # Get the study
         dataum['version'] = latest;
 
         # Get the DD path
-        dataum['dd'] = os.path.join(dataDir, dataum['name'], 'version' + str(dataum['version']), 'DD', 'DD.xlsx');
-        if not os.path.isfile(dataum['dd']):
-            raise Exception("Missing path for " + dataum['dd']);
+        dataum['dd'] = getCSVFile(os.path.join(dataDir, dataum['name'], 'version' + str(dataum['version']), 'DD'));
 
         # get the SDD path
-        dataum['sdd'] = os.path.join(dataDir, dataum['name'], 'version' + str(dataum['version']), 'SDD', 'SDD.xlsx');
-        if not os.path.isfile(dataum['sdd']):
-            raise Exception("Missing path for " + dataum['sdd']);
+        dataum['sdd'] = getCSVFile(os.path.join(dataDir, dataum['name'], 'version' + str(dataum['version']), 'SDD'));
 
         dataset.append(dataum);
 
@@ -205,6 +223,7 @@ derName = ['wasderivedfrom'];
 genName = ['wasgeneratedby'];
 for dataum in dataset:
     print('Parsing ' + dataum['name'] + ' semantic data dictionary');
+    dataum['virtual'] = [];
 
     # Get the prefixes
     ws = pandas.read_excel(dataum['sdd'], prefix_sheet);
@@ -228,6 +247,7 @@ for dataum in dataset:
         raise Exception('Missing column mapping in sdd prefix');
 
     df = ws[[preColIndex, uriColIndex]]
+    prefixCount = {};
     for i in range(df.shape[0]): #iterate over rows
         pre = str(df.iat[i, 0]).strip();
         uri = str(df.iat[i, 1]).strip();
@@ -239,6 +259,8 @@ for dataum in dataset:
                 raise Exception('Overloaded prefix map!');
         else:
             prefix[pre] = uri;
+
+        prefixCount[pre] = 0;
     print('Finished Updating prefix map...');
     print(prefix);
 
@@ -313,7 +335,43 @@ for dataum in dataset:
         name = str(df.iat[i, 0]).strip();
 
         if name.startswith('??'): # virtual column
-            print('skip');
+        #       virtual[{name, entity, role, relation, inRelationTo}]
+        #}]
+            virtualVar = {};
+            virtualVar['name'] = name;
+
+            entity = str(df.iat[i, 5]).strip();
+            if entity == 'nan':
+                virtualVar['Entity'] = '';
+            else:
+                virtualVar['Entity'] = expandURI(prefix, entity, prefixCount);
+
+            role = str(df.iat[i, 6]).strip();
+            if role == 'nan':
+                virtualVar['Role'] = '';
+            else:
+                virtualVar['Role'] = role;
+
+            relation = str(df.iat[i, 7]).strip();
+            if relation == 'nan':
+                virtualVar['Relation'] = '';
+            else:
+                virtualVar['Relation'] = expandURI(prefix, relation, prefixCount);
+
+            inRelationTo = str(df.iat[i, 8]).strip();
+            if inRelationTo == 'nan':
+                virtualVar['inRelationTo'] = [];
+            else:
+                virtualVar['inRelationTo'] = getListOfVars(inRelationTo);
+
+            wasDerivedFrom = str(df.iat[i, 9]).strip();
+            if wasDerivedFrom == 'nan':
+                virtualVar['wasDerivedFrom'] = [];
+            else:
+                virtualVar['wasDerivedFrom'] = getListOfVars(wasDerivedFrom);
+
+            dataum['virtual'].append(virtualVar);
+
         else: # Regular column
             # Look for the correct variable
             workingVar = None;
@@ -329,7 +387,7 @@ for dataum in dataset:
             if attribute == 'nan':
                 workingVar['attribute'] = '';
             else:
-                workingVar['attribute'] = expandURI(prefix, attribute);
+                workingVar['attribute'] = expandURI(prefix, attribute, prefixCount);
 
             attributeOf = str(df.iat[i, 2]).strip();
             if attributeOf == 'nan':
@@ -346,7 +404,7 @@ for dataum in dataset:
                 workingVar['unitClass'] = '';
             else:
                 if len(unitClass.split(':')) == 2:  # this is uri
-                    workingVar['unitClass'] = expandURI(prefix, unitClass);
+                    workingVar['unitClass'] = expandURI(prefix, unitClass, prefixCount);
 
                 else:   # this is a text unit
                     workingVar['unitClass'] = unitClass;
@@ -359,22 +417,26 @@ for dataum in dataset:
 
             inRelationTo = str(df.iat[i, 8]).strip();
             if inRelationTo == 'nan':
-                workingVar['inRelationTo'] = '';
+                workingVar['inRelationTo'] = [];
             else:
-                workingVar['inRelationTo'] = inRelationTo;
+                workingVar['inRelationTo'] = getListOfVars(inRelationTo);
 
             wasDerivedFrom = str(df.iat[i, 9]).strip();
             if wasDerivedFrom == 'nan':
-                workingVar['wasDerivedFrom'] = '';
+                workingVar['wasDerivedFrom'] = [];
             else:
-                workingVar['wasDerivedFrom'] = wasDerivedFrom;
+                workingVar['wasDerivedFrom'] = getListOfVars(wasDerivedFrom);
 
             wasGeneratedBy = str(df.iat[i, 10]).strip();
             if wasGeneratedBy == 'nan':
                 workingVar['wasGeneratedBy'] = '';
             else:
-                workingVar['wasGeneratedBy'] = expandURI(prefix, wasGeneratedBy);
+                workingVar['wasGeneratedBy'] = expandURI(prefix, wasGeneratedBy, prefixCount);
 
+    # Ensure that all ontologies have been used
+    # for pre in prefixCount:
+        # if prefixCount[pre] == 0:
+            # raise Exception('Ontology never used = ' + pre + ': ' + prefix[pre]);
 
 print('Completed the SDD parsing...');
 print(dataset);
