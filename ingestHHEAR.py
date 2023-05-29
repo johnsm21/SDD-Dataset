@@ -91,6 +91,8 @@ print('We found ' + str(len(dataset.keys())) + ' studies!')
 # print('We found the following datasets:');
 print(dataset);
 
+# Remove studies without a DD and SDD
+
 dataDictionary = autoclass('DataDictionary');
 print('dataDictionary.getDDPath()');
 print(dataDictionary.getDDPath());
