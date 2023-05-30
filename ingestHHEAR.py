@@ -89,9 +89,20 @@ for i in range(df.shape[0]): #iterate over rows
 # Print what we found
 print('We found ' + str(len(dataset.keys())) + ' studies!')
 # print('We found the following datasets:');
-print(dataset);
+# print(dataset);
 
 # Remove studies without a DD and SDD
+removedDataset = {};
+for projNum, studyData in dataset.items():
+    if len(studyData['dd']) > 0 and len(studyData['sdd']) > 0:
+        removedDataset[projNum] = studyData;
+dataset = removedDataset;
+removedDataset = None;
+
+# Print what we found
+print('Reduced down to ' + str(len(dataset.keys())) + ' studies!')
+# print('We found the following datasets:');
+print(dataset);
 
 dataDictionary = autoclass('DataDictionary');
 print('dataDictionary.getDDPath()');
