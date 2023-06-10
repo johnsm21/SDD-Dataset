@@ -15,7 +15,9 @@ public class DDValidator {
 		
 		for(DDRule r : _rules) {
 			CellProv[] prov = r.checkRule(d);
-			repo.addMessage(prov, r.getSeverity());
+			if(prov.length > 0) {
+				repo.addMessage(prov, r.getSeverity());
+			}
 		}
 		
 		return repo;

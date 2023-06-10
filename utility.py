@@ -89,3 +89,6 @@ def getCSVFile(path):
 def getListOfVars(strData):
     vars = strData.split(',');
     return [x.strip() for x in vars];
+
+def printCellProv(cellProv):
+    return '(' + cellProv._sheetName + ', ' + str(cellProv._rowIndex) + ', ' + str(cellProv._colIndex) + '): ' + cellProv._annotation

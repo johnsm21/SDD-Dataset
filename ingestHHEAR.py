@@ -1,7 +1,12 @@
 import os;
+import sys;
 import pandas;
 from datetime import datetime, date;
-from jnius import autoclass
+
+import jnius_config
+# jnius_config.set_classpath('.', '/Users/mjohnson/Projects/SDD-Dataset/SDD-Validation/SDD_Validation/target/classes');
+jnius_config.set_classpath('.', '/Users/mjohnson/Projects/SDD-Dataset/SDD-Validation/SDD_Validation/target/SDD_Validation-0.0.1-SNAPSHOT-jar-with-dependencies.jar')
+from jnius import autoclass;
 
 from utility import *;
 
@@ -101,9 +106,37 @@ removedDataset = None;
 
 # Print what we found
 print('Reduced down to ' + str(len(dataset.keys())) + ' studies!')
-# print('We found the following datasets:');
 print(dataset);
 
-dataDictionary = autoclass('DataDictionary');
-print('dataDictionary.getDDPath()');
-print(dataDictionary.getDDPath());
+# dataDictionary = autoclass('DataDictionary');
+# print('dataDictionary.getDDPath()');
+# print(dataDictionary.getDDPath());
+
+PythonIOClass = autoclass('io.PythonIO');
+pythonIO = PythonIOClass();
+
+for projNum, studyData in dataset.items():
+    toDoList = ['2016-1407', '2016-1431', '2016-1438'];
+    if projNum not in toDoList:
+        for ddPath in studyData['dd']:
+            print('----------------------');
+            print(projNum + ': ' + ddPath);
+
+            # Get Report
+            report = pythonIO.validatDD(ddPath);
+            if report.isValid():
+                # print warning if no errors
+                if report._warnings.size() > 0:
+                    print('Warnings:');
+                    for i in range(report._warnings.size()):
+                        print(printCellProv(report._warnings.get(i)));
+
+            else: # Print errors if we find any
+                print('Errors found:');
+                for i in range(report._errors.size()):
+                    print(printCellProv(report._errors.get(i)));
+
+                sys.exit(0); # stop running
+
+
+            print('----------------------');

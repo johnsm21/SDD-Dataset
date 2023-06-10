@@ -62,4 +62,34 @@ public class TestDataDictionary {
 		// System.out.println(Arrays.toString(answers));
 		assertTrue(Arrays.equals(results, answers));
 	}
+	
+	@Test
+	public void test1407() throws IOException, DataDictionaryException {
+		String path = "/Users/mjohnson/Projects/SDD-Dataset/data/HHEAR-Studies/2023-05-28/2016-1407/1407_Epi_DDCB.xlsx";
+		_d = new DataDictionary(path);
+
+		// CellProv[] results = _d.getProv("bmicat", Datum.unit);
+		// CellProv[] answers = {new CellProv("DATA DICTIONARY", 7, 15)};
+		// System.out.println(Arrays.toString(results));
+		// System.out.println(Arrays.toString(answers));
+		// assertTrue(Arrays.equals(results, answers));
+	}
+	
+	@Test
+	public void test1431() throws IOException, DataDictionaryException {
+		String path = "/Users/mjohnson/Projects/SDD-Dataset/data/HHEAR-Studies/2023-05-28/2016-1431/1431_EPI_DDCB.xlsx";
+		_d = new DataDictionary(path);
+	}
+	
+	@Test
+	public void test1432() throws IOException, DataDictionaryException {
+		String path = "/Users/mjohnson/Projects/SDD-Dataset/data/HHEAR-Studies/2023-05-28/2016-1432/1432_EPI_DDCB.xlsx";
+		_d = new DataDictionary(path);
+	}
+	
+	@Test
+	public void test1438() throws IOException, DataDictionaryException {
+		String path = "/Users/mjohnson/Projects/SDD-Dataset/data/HHEAR-Studies/2023-05-28/2016-1438/1438_EPI_DDCB.xlsx";
+		_d = new DataDictionary(path);
+	}
 }
