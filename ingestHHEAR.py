@@ -116,7 +116,8 @@ PythonIOClass = autoclass('io.PythonIO');
 pythonIO = PythonIOClass();
 
 for projNum, studyData in dataset.items():
-    toDoList = ['2016-1407', '2016-1431', '2016-1438'];
+    toDoList = [];
+    # toDoList = ['2016-1407', '2016-1431', '2016-1432', '2016-1438', '2017-2121'];
     if projNum not in toDoList:
         for ddPath in studyData['dd']:
             print('----------------------');

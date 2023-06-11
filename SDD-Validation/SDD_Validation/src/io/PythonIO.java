@@ -9,6 +9,7 @@ import data.Report;
 import rules.RuleCategoricalMustHaveCategories;
 import rules.RuleDDMustHaveDescription;
 import rules.RuleDDMustHaveVarName;
+import rules.RuleDDMustNotHaveUnknownVarType;
 import rules.RuleUniqueName;
 import validation.DDRule;
 import validation.DDValidator;
@@ -18,7 +19,7 @@ public final class PythonIO {
 	private DDValidator _ddv;
 	public PythonIO() {
 		
-		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), new RuleCategoricalMustHaveCategories()};
+		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), new RuleCategoricalMustHaveCategories(), new RuleDDMustNotHaveUnknownVarType()};
 		_ddv = new DDValidator(rules);
 	}
 	

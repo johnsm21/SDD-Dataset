@@ -15,7 +15,7 @@ import org.junit.Test;
 public class TestVariable {
 	@Test
 	public void integerTest() throws VariableException{
-		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", "iD");
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", "iD", null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.integer));
@@ -24,7 +24,7 @@ public class TestVariable {
 	
 	@Test
 	public void nullTest() throws VariableException{
-		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", null);
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", null, null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.integer));
@@ -33,7 +33,7 @@ public class TestVariable {
 	
 	@Test
 	public void continousTest() throws VariableException{
-		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Continuous", "iD");
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Continuous", "iD", null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.continuous));
@@ -42,7 +42,7 @@ public class TestVariable {
 	
 	@Test
 	public void rangeTest() throws VariableException{
-		Variable v = new Variable("PID", "CHEAR Participant ID number ", "numerical", "range 0-5");
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "numerical", "range 0-5", null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.numerical));
@@ -56,7 +56,7 @@ public class TestVariable {
 	public void catagoryTest() throws VariableException{
 		Variable v = new Variable("PID", "CHEAR Participant ID number ", "categorical", 
 				"1=illiterate, 2=able to write, 3=primary education, 4=secondary education, "
-				+ "6=college/graduate, 7=post-graduate");
+				+ "6=college/graduate, 7=post-graduate", null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.categorical));
@@ -73,7 +73,7 @@ public class TestVariable {
 	
 	@Test
 	public void toStringTest() throws VariableException{
-		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", "iD");
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "Integer", "iD", null);
 		assertTrue(v._name.equals("PID"));
 		assertTrue(v._desc.equals("CHEAR Participant ID number"));
 		assertTrue(v._type.equals(VarType.integer));
@@ -82,14 +82,8 @@ public class TestVariable {
 	}
 	
 	@Test
-	public void badType() {
-		try {
-			Variable v = new Variable("PID", "CHEAR Participant ID number ", "hi", "iD");
-			fail("We were supposed to throw an exception!");
-			
-		}
-		catch(VariableException e) {
-			assertTrue(e.getMessage().equals("Unknown Type: hi"));
-		}
+	public void badType() throws VariableException{
+		Variable v = new Variable("PID", "CHEAR Participant ID number ", "hi", "iD", null);
+		assertTrue(v._type.equals(VarType.unknown));
 	}
 }
