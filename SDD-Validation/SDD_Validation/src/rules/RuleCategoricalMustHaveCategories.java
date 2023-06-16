@@ -30,11 +30,23 @@ public class RuleCategoricalMustHaveCategories implements DDRule{
 		
 		for(Variable var : vars) {
 			if(var._type == VarType.categorical) {
-				if(var._category.size() < 2) {
-					CellProv[] prov = d.getProv(var._name, Datum.type);
-					for(CellProv cell : prov) {
-						cell._annotation = genErrorMessage();
-						res.add(cell);
+				int numCats = var._category.size();
+				CellProv[] cbProv = d.getProv(var._name, Datum.codebook);
+				
+				// Wasn't in unit or codebook
+				if(numCats < 2) {
+					if(cbProv == null) {
+						CellProv[] prov = d.getProv(var._name, Datum.unit);
+						for(CellProv cell : prov) {
+							cell._annotation = genErrorMessage();
+							res.add(cell);
+						}
+					}
+					else {
+						for(CellProv cell : cbProv) {
+							cell._annotation = genErrorMessage();
+							res.add(cell);
+						}
 					}
 				}
 			}

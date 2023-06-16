@@ -76,7 +76,7 @@ public class TestDDRules {
 			DataDictionary d = new DataDictionary(path);
 			CellProv[] msg = _rule.checkRule(d);
 			System.out.println(Arrays.toString(msg));
-			assertTrue(msg.length == 1);
+			assertTrue(msg.length == 0); // we skip over missing var names now 
 			
 		} catch (IOException | DataDictionaryException e) {
 			System.out.println(e);

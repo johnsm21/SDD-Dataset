@@ -27,20 +27,23 @@ dataset = {}; # { projNumber --> {name, dd, sdd, version}}
 
 # Get the latest version
 latest = datetime.min
+latest_path = None;
 for version in os.listdir(dataDir):
+    datetime_version = version.split('_')[0];
     if version != '.DS_Store':
-        datetime_version = datetime.strptime(version, '%Y-%m-%d');
+        datetime_version = datetime.strptime(datetime_version, '%Y-%m-%d');
         # print(datetime_version);
 
         # Extract version expecting folder such as version7
         if datetime_version > latest:
             latest = datetime_version;
+            latest_path = version;
 
 latest = date(latest.year,latest.month, latest.day);
 print('latest');
-print(os.path.join(dataDir, str(latest)));
+print(os.path.join(dataDir, str(latest_path)));
 
-ws = pandas.read_excel(os.path.join(dataDir, str(latest), manifestFilename), manifestSheet);
+ws = pandas.read_excel(os.path.join(dataDir, latest_path, manifestFilename), manifestSheet);
 df = ws[[projNumIndex, projNamIndex, fileDoiIndex, fileTypeIndex, fileNameIndex]];
 # print(df);
 
@@ -64,7 +67,7 @@ for i in range(df.shape[0]): #iterate over rows
 
         # Checks that the file exists
         fileName = str(df.iat[i, 4]).strip();
-        filepath = os.path.join(dataDir, str(latest), projNum, fileName);
+        filepath = os.path.join(dataDir, latest_path, projNum, fileName);
         if os.path.isfile(filepath):
             # Add file specific data
             if fileType == 'DD':
@@ -84,7 +87,7 @@ for i in range(df.shape[0]): #iterate over rows
 
             # add DOI if we have it
             fileDoi = str(df.iat[i, 2]).strip();
-            print(fileDoi)
+            # print(fileDoi)
             if fileDoi != 'nan':
                 dataset[projNum]['doi'][fileName] = fileDoi;
         else:
