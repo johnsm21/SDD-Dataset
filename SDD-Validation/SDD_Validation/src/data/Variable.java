@@ -7,14 +7,17 @@ public class Variable {
 	private final static String _integerTypeKey = "integer";
 	private final static String _continuousTypeKey = "continuous";
 	private final static String _numericalTypeKey = "numerical";
+	private final static String _numericTypeKey = "numeric";
 	private final static String _categoricalTypeKey = "categorical";
 	private final static String _primaryTypeKey = "primary key";
 	private final static String _dateTypeKey = "date";
 	private final static String _enumeratedTypeKey = "enumerated"; // This is the same as categorical
 	private final static String _enumeratedIntTypeKey = "enumerated integer"; // This is the same as categorical
 	
-	
-	
+	private final static String _floatTypeKey = "float";
+	private final static String _charTypeKey = "character";
+	private final static String _textTypeKey = "text";
+	private final static String _alphanumericTypeKey = "alphanumeric";
 	private final static String _stringTypeKey = "string";
 	private final static String _decimalTypeKey = "decimal";
 	private final static String _emptyTypeKey = "";
@@ -70,34 +73,39 @@ public class Variable {
 				_type = VarType.continuous;
 				_unit = cleanUnit;
 				break;
+			case _numericTypeKey:
 			case _numericalTypeKey: 
 				_type = VarType.numerical;
+				// try to extract it  from the unit
 				try {
 					_range = extractRange(cleanUnit);
 				}
-				catch(VariableException e) {
-					if(min.isEmpty() || max.isEmpty()) {
-						throw e;
+				catch(VariableException e) {	
+					// try to convert min and max to ints
+					try {
+						_range  = new int[2];
+						_range[0] = Integer.parseInt(min);
+						_range[1] = Integer.parseInt(max);
 					}
-					else {
-						try {
-							_range  = new int[2];
-							_range[0] = Integer.parseInt(min);
-							_range[1] = Integer.parseInt(max);
-						}
-						catch(NumberFormatException nf) {
-							throw e;
-						}
+					catch(NumberFormatException nf) {
+						// one wasn't defined so this is just a continuous variable
+						_range = null;
+						_type = VarType.continuous;
+						_unit = cleanUnit;
 					}
 				}
 				break;
 				
+			case _alphanumericTypeKey:	
 			case _stringTypeKey: 
+			case _textTypeKey:
+			case _charTypeKey:
 				_type = VarType.string;
 				_unit = cleanUnit;
 				break;
 				
 			case _decimalTypeKey: 
+			case _floatTypeKey:
 				_type = VarType.decimal;
 				_unit = cleanUnit;
 				break;
@@ -123,13 +131,13 @@ public class Variable {
 				else {
 					_category = cats;
 				}
-				
+				// System.out.println(_category);
 				break;
 				
 			case _primaryTypeKey: 
 				_type = VarType.integer;
 				_unit = cleanUnit;
-				System.out.println("Warning: primary key found! ToDo: need to fully integrate");
+				// System.out.println("Warning: primary key found! ToDo: need to fully integrate");
 				break;
 				
 			case _emptyTypeKey: 

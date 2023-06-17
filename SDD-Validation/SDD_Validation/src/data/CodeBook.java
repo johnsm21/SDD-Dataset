@@ -1,9 +1,7 @@
 package data;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -121,17 +119,18 @@ public class CodeBook {
 			// Retrieve cell values
 			String scaleText = Utility.getCellAsString(currentRow.getCell(_scaleCol));
 			String var = Utility.getCellAsString(currentRow.getCell(_nameCol));
+			String code = Utility.getCellAsString(currentRow.getCell(_codeCol));
+			String def = Utility.getCellAsString(currentRow.getCell(_defCol));
+			
+			// System.out.println("Before: "+ var + ", " + code + ", " + def);
 			
 			// Add the prov info
 			_varToRow.put(var, currentRow.getRowNum());
 			
 			// Found a categorical row
-			if(isCategorical(scaleText)) {				
-				// Extract other cells
-				String code = Utility.getCellAsString(currentRow.getCell(_codeCol));
-				String def = Utility.getCellAsString(currentRow.getCell(_defCol));
-				
-				// System.out.println(var + ", " + code + ", " + def);
+			// We ignore rows with missing info or that do not contain categories
+			if((!var.isBlank()) && (!code.isBlank()) && (!def.isBlank()) && isCategorical(scaleText)) {		
+				// System.out.println("After: "+ var + ", " + code + ", " + def);
 				
 				Map<String, String> result = extractType2(code, def);
 				if(result == null) { // not type 2 keep looking
@@ -140,7 +139,7 @@ public class CodeBook {
 					if(result == null) { // not type 3 keep looking
 						
 						// Check if current row is type 1 compatible
-						if( var.equals("") || code.equals("") || var.equals("")) {
+						if( var.equals("") || code.equals("") || def.equals("")) {
 							throw new VariableException("Unknown codebook format!");
 						}
 						
@@ -160,6 +159,7 @@ public class CodeBook {
 								break; 
 							}
 						}
+						// System.out.println(result);
 						
 						isType1 = 1; // Assume its type 1 and throw an error if were wrong
 						// System.out.println("Assume type 1");
@@ -227,7 +227,11 @@ public class CodeBook {
 		return Variable.extractCategory(Utility.cleanString(code));
 	}
 	
-	
+	/**
+	 * This determines if a variable has codes
+	 * @param s
+	 * @return
+	 */
 	private static Boolean isCategorical(String s) {
 		if(s == null) {
 			return false;
@@ -237,6 +241,9 @@ public class CodeBook {
 			case "2":
 			case "2.0":
 			case "categorical":
+			case "3":
+			case "3.0":
+			case "ordinal":
 					return true;
 			default:
 				return false;
