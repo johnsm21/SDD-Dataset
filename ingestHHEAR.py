@@ -20,7 +20,8 @@ fileTypeIndex = 'File';
 fileNameIndex = 'File name';
 
 # Operands
-dataDir = 'data/HHEAR-Studies';
+# dataDir = 'data/HHEAR-Studies';
+dataDir = 'data/The-Cancer-Genomic-Atlas';
 
 # For each SDD & DD get the latest paths and names
 dataset = {}; # { projNumber --> {name, dd, sdd, version}}
@@ -68,6 +69,7 @@ for i in range(df.shape[0]): #iterate over rows
         # Checks that the file exists
         fileName = str(df.iat[i, 4]).strip();
         filepath = os.path.join(dataDir, latest_path, projNum, fileName);
+        print(filepath)
         if os.path.isfile(filepath):
             # Add file specific data
             if fileType == 'DD':
