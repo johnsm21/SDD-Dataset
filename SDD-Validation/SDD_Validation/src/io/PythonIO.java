@@ -1,5 +1,6 @@
 package io;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 import data.DataDictionaryException;
@@ -8,7 +9,9 @@ import data.DataDictionary;
 import data.Report;
 import rules.RuleCategoricalMustHaveCategories;
 import rules.RuleDDMustHaveDescription;
+import rules.RuleDDMustHaveGoodDescription;
 import rules.RuleDDMustHaveVarName;
+import rules.RuleDDMustNotHaveMisspelling;
 import rules.RuleDDMustNotHaveUnknownVarType;
 import rules.RuleUniqueName;
 import validation.DDRule;
@@ -17,9 +20,11 @@ import validation.DDValidator;
 public final class PythonIO {
 	
 	private DDValidator _ddv;
-	public PythonIO() {
+	public PythonIO() throws FileNotFoundException, IOException {
 		
-		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), new RuleCategoricalMustHaveCategories(), new RuleDDMustNotHaveUnknownVarType()};
+		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), 
+				new RuleCategoricalMustHaveCategories(), new RuleDDMustNotHaveUnknownVarType(), 
+				new RuleDDMustHaveGoodDescription(), new RuleDDMustNotHaveMisspelling()};
 		_ddv = new DDValidator(rules);
 	}
 	

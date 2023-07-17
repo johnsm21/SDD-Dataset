@@ -20,8 +20,8 @@ fileTypeIndex = 'File';
 fileNameIndex = 'File name';
 
 # Operands
-# dataDir = 'data/HHEAR-Studies';
-dataDir = 'data/The-Cancer-Genomic-Atlas';
+dataDir = 'data/HHEAR-Studies';
+# dataDir = 'data/The-Cancer-Genomic-Atlas';
 
 # For each SDD & DD get the latest paths and names
 dataset = {}; # { projNumber --> {name, dd, sdd, version}}
@@ -136,6 +136,7 @@ for projNum, studyData in dataset.items():
                     print('Warnings:');
                     for i in range(report._warnings.size()):
                         print(printCellProv(report._warnings.get(i)));
+                    sys.exit(0); # stop running
 
             else: # Print errors if we find any
                 print('Errors found:');

@@ -2,6 +2,7 @@ package test;
 
 import static org.junit.Assert.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -12,6 +13,7 @@ import data.DataDictionary;
 import data.DataDictionaryException;
 import rules.RuleUniqueName;
 import rules.RuleDDMustHaveVarName;
+import rules.RuleDDMustNotHaveMisspelling;
 import rules.RuleDDMustNotHaveUnknownVarType;
 import validation.DDRule;
 import rules.RuleDDMustHaveDescription;
@@ -192,6 +194,23 @@ public class TestDDRules {
 			CellProv[] msg = _rule.checkRule(d);
 			System.out.println(Arrays.toString(msg));
 			assertTrue(msg.length == 1);
+			
+		} catch (IOException | DataDictionaryException e) {
+			System.out.println(e);
+			fail();
+		}
+	}
+	
+	@Test
+	public void TestRuleDDMustNotHaveMisspelling()  {
+		
+		String path = "testData/dd_multipleVars.xlsx";
+		try {
+			DDRule _rule = new RuleDDMustNotHaveMisspelling();
+			DataDictionary d = new DataDictionary(path);
+			CellProv[] msg = _rule.checkRule(d);
+			System.out.println(Arrays.toString(msg));
+			assertTrue(msg.length == 2);
 			
 		} catch (IOException | DataDictionaryException e) {
 			System.out.println(e);
