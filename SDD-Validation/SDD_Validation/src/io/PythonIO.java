@@ -50,7 +50,23 @@ public final class PythonIO {
 	public String test(String ddPath) {
 		return ddPath;	
 	}
-
+	
+	public Report validatData(String ddPath, String dataPath) {
+		try {
+			DataDictionary d = new DataDictionary(ddPath);
+			System.out.println("---------------------");
+			System.out.println(ddPath + " --> " + dataPath);
+			System.out.println("---------------------");
+			return _ddv.validateDD(d);
+		}
+		catch(IOException | DataDictionaryException e) {
+			Report r = new Report();
+			CellProv c = new CellProv(e.getMessage(), 0, 0);
+			r.addMessage( new CellProv[]{c}, Report.Severity.error);
+			return r;
+		}		
+	}
+	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 

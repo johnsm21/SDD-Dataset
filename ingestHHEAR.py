@@ -24,7 +24,8 @@ dataDir = 'data/HHEAR-Studies';
 # dataDir = 'data/The-Cancer-Genomic-Atlas';
 
 # For each SDD & DD get the latest paths and names
-dataset = {}; # { projNumber --> {name, dd, sdd, version}}
+dataset = {}; # { projNumber --> {name, dd, sdd, data, version, mapping}}
+# mapping --> [{ dd --> data, sdd}]
 
 # Get the latest version
 latest = datetime.min
@@ -63,6 +64,7 @@ for i in range(df.shape[0]): #iterate over rows
             dataset[projNum]['dd'] = [];
             dataset[projNum]['sdd'] = [];
             dataset[projNum]['cb'] = [];
+            dataset[projNum]['data'] = [];
             dataset[projNum]['version'] = latest;
             dataset[projNum]['doi'] = {};
 
@@ -77,6 +79,9 @@ for i in range(df.shape[0]): #iterate over rows
 
             elif fileType == 'SDD':
                 dataset[projNum]['sdd'].append(filepath);
+
+            elif fileType == 'Data':
+                dataset[projNum]['data'].append(filepath);
 
             elif fileType == 'Readme':
                 dataset[projNum]['readme'] = filepath;
@@ -101,10 +106,10 @@ print('We found ' + str(len(dataset.keys())) + ' studies!')
 # print('We found the following datasets:');
 # print(dataset);
 
-# Remove studies without a DD and SDD
+# Remove studies without a DD and SDD and data
 removedDataset = {};
 for projNum, studyData in dataset.items():
-    if len(studyData['dd']) > 0 and len(studyData['sdd']) > 0:
+    if len(studyData['dd']) > 0 and len(studyData['sdd']) > 0 and len(studyData['data']) > 0:
         removedDataset[projNum] = studyData;
 dataset = removedDataset;
 removedDataset = None;
@@ -116,6 +121,7 @@ print(dataset);
 # dataDictionary = autoclass('DataDictionary');
 # print('dataDictionary.getDDPath()');
 # print(dataDictionary.getDDPath());
+print('\n\n')
 
 PythonIOClass = autoclass('io.PythonIO');
 pythonIO = PythonIOClass();
@@ -124,26 +130,68 @@ for projNum, studyData in dataset.items():
     toDoList = [];
     # toDoList = ['2016-1407', '2016-1431', '2016-1432', '2016-1438', '2017-2121'];
     if projNum not in toDoList:
-        for ddPath in studyData['dd']:
-            print('----------------------');
-            print(projNum + ': ' + ddPath);
+        dataset[projNum]['mapping'] = {};
 
-            # Get Report
-            report = pythonIO.validatDD(ddPath);
-            if report.isValid():
-                # print warning if no errors
-                if report._warnings.size() > 0:
-                    print('Warnings:');
-                    for i in range(report._warnings.size()):
-                        print(printCellProv(report._warnings.get(i)));
-                    sys.exit(0); # stop running
+        # Generate a mapping between multiple DDs, SDDs, and Data files
+        if (len(dataset[projNum]['data']) == 1) and (len(studyData['dd']) == 1):
+            dataset[projNum]['mapping'][studyData['dd'][0]] = [dataset[projNum]['data'][0]];
+        else:
+            dataCopy = dataset[projNum]['data'].copy();
+            for ddPath in studyData['dd']:
+                mapping = [];
 
-            else: # Print errors if we find any
-                print('Errors found:');
-                for i in range(report._errors.size()):
-                    print(printCellProv(report._errors.get(i)));
+                # find the corresponding file
+                potDataPath = ddPath.split("DDCB");
+                if(len(potDataPath) != 2):
+                    print("Bad DD filename " + ddPath);
+                    sys.exit(0);
+                potDataPath = potDataPath[0] + "DATA.csv"
 
-                sys.exit(0); # stop running
+                # check to make sure it exists
+                if(potDataPath in dataCopy):
+                    mapping.append(potDataPath);
+                    dataCopy.remove(potDataPath);
+                else:
+                    print("Missing data filename " + potDataPath);
+                    print("Data file list " + str(dataset[projNum]['data']));
+                    sys.exit(0);
+
+                dataset[projNum]['mapping'][ddPath] = mapping;
+
+            if len(dataCopy) != 0:
+                print("Left over data file " + str(dataCopy));
+                sys.exit(0);
+
+    # Check that Dataset is valid for a DD
+    for ddPath, maplist in dataset[projNum]['mapping'].items():
+        report = pythonIO.validatData(ddPath, maplist[0]);
+        sys.exit(0);
 
 
-            print('----------------------');
+        # for ddPath in studyData['dd']:
+        #     print('----------------------');
+        #     print(projNum + ': ' + ddPath);
+        #
+        #     # Get Report
+        #     report = pythonIO.validatDD(ddPath);
+        #     if report.isValid():
+        #         # print warning if no errors
+        #         if report._warnings.size() > 0:
+        #             print('Warnings:');
+        #             for i in range(report._warnings.size()):
+        #                 print(printCellProv(report._warnings.get(i)));
+        #             sys.exit(0); # stop running
+        #
+        #     else: # Print errors if we find any
+        #         print('Errors found:');
+        #         for i in range(report._errors.size()):
+        #             print(printCellProv(report._errors.get(i)));
+        #
+        #         sys.exit(0); # stop running
+        #
+        #
+        #     print('----------------------');
+
+print(dataset);
+# validate dataset
+# validate sdds
