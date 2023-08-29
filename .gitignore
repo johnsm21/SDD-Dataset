@@ -1,6 +1,7 @@
 data/chip-data
 data/HHEAR-Studies
 data/study34
+data/ontologies
 output
 .DS_Store
 __pycache__

@@ -126,6 +126,163 @@ print('\n\n')
 PythonIOClass = autoclass('io.PythonIO');
 pythonIO = PythonIOClass();
 
+
+# Check that SDD Valid
+for projNum, studyData in dataset.items():
+    for sddPath in studyData['sdd']:
+        print('----------------------');
+        print(projNum + ': ' + sddPath);
+
+        # Get Report
+        report = pythonIO.validatSDD(sddPath);
+        if report.isValid():
+            # print warning if no errors
+            if report._warnings.size() > 0:
+                print('Warnings:');
+                for i in range(report._warnings.size()):
+                    print(printCellProv(report._warnings.get(i)));
+                sys.exit(0); # stop running
+
+        else: # Print errors if we find any
+            print('Errors found:');
+            for i in range(report._errors.size()):
+                print(printCellProv(report._errors.get(i)));
+
+            sys.exit(0); # stop running
+
+
+        print('----------------------');
+        sys.exit(0);
+
+sys.exit(0);
+
+
+
+## right now we have DD: [Data, SDD]
+## But there are many SDDs to a DD and Dataset
+## were going to SDD: [DD, DATA]
+for projNum, studyData in dataset.items():
+    dataset[projNum]['mapping'] = {};
+    print('--------------------');
+    # Generate a mapping between multiple DDs, SDDs, and Data files
+    if (len(dataset[projNum]['data']) == 1) and (len(studyData['dd']) == 1) and (len(studyData['sdd']) == 1):
+        # we only have one of each so its obvious
+        dataset[projNum]['mapping'][studyData['sdd'][0]] = [dataset[projNum]['dd'][0], dataset[projNum]['data'][0]];
+        print(projNum + " single case");
+
+    else:
+        # we have multiple sdds
+
+        # we have many sdds but only 1 dd and data
+        if (len(dataset[projNum]['data']) == 1) and (len(studyData['dd']) == 1):
+            for sdd in studyData['sdd']:
+                dataset[projNum]['mapping'][sdd] = [dataset[projNum]['dd'][0], dataset[projNum]['data'][0]];
+
+            print(projNum + " many sdds but only 1 dd and data");
+
+        else:
+            # each sdd corresponds to a single other file
+            if len(dataset[projNum]['data']) == len(studyData['dd']) == len(studyData['sdd']) :
+                print(projNum + " each sdd corresponds to a single other file");
+                # print(studyData['sdd']);
+                # print(studyData['dd']);
+                # print(studyData['data']);
+                for sdd in studyData['sdd']:
+                    # get file name
+                    folders = sdd.split('/');
+                    basePath = sdd.replace(folders[-1], '');
+                    coreName = folders[-1].split('-');
+                    if len(coreName) == 6:
+                        coreName = coreName[4];
+                        halfNum = projNum.split("-");
+
+                        # get actual project number
+                        if (len(halfNum) == 2) or (len(halfNum) == 3):
+
+                            if len(halfNum) == 2:
+                                halfNum = halfNum[1];
+
+                            # special case for the one combined project (2018-2517_2020-3131) file we will grab it from the SDD name
+                            if len(halfNum) == 3:
+                                halfNum = folders[-1].split('-')[2];
+
+
+
+                            ddName = basePath + halfNum + "_" + coreName + "_DDCB.xlsx";
+                            dataName = basePath + halfNum + "_" + coreName + "_DATA.xlsx";
+
+                            # print(ddName);
+                            # print(dataName);
+
+                            # check to make sure dd exists
+                            if(ddName not in dataset[projNum]['dd']):
+                                print("Missing data filename " + ddName);
+                                print("Data file list " + str(dataset[projNum]['dd']));
+                                sys.exit(1);
+
+                            # check to make sure data exists
+                            if(dataName not in dataset[projNum]['data']):
+                                print("Missing data filename " + dataName);
+                                print("Data file list " + str(dataset[projNum]['data']));
+                                sys.exit(1);
+
+
+                            dataset[projNum]['mapping'][sdd] = [ddName, dataName];
+
+
+                        else:
+                            print("Bad project number " + projNum);
+                            sys.exit(1);
+                    else:
+                        print("Bad file name: " + sdd);
+                        sys.exit(1);
+
+            else:
+
+                print('Unknown mapping case');
+                print(studyData['sdd']);
+                print(studyData['dd']);
+                print(studyData['data']);
+                sys.exit(1);
+
+    # print(dataset[projNum]['mapping']);
+    print('--------------------');
+
+print("Done Mapping!");
+print('\n\n');
+
+print('Starting mapping validation');
+
+# Validate Mappings
+for projNum, studyData in dataset.items():
+    print('--------------------');
+    print(projNum);
+    for sddPath, [ddPath, dataPath] in studyData['mapping'].items():
+        print(sddPath + ' --> ' + ddPath + ' and ' + dataPath);
+
+        report = pythonIO.validatData(sddPath, ddPath, dataPath);
+        if report.isValid():
+            # print warning if no errors
+            if report._warnings.size() > 0:
+                print('Warnings:');
+                for i in range(report._warnings.size()):
+                    print(printCellProv(report._warnings.get(i)));
+
+        else: # Print errors if we find any
+            print('Errors found:');
+            for i in range(report._errors.size()):
+                print(printCellProv(report._errors.get(i)));
+
+            sys.exit(0); # stop running
+
+    print('--------------------');
+
+
+sys.exit(0);
+
+
+
+
 for projNum, studyData in dataset.items():
     toDoList = [];
     # toDoList = ['2016-1407', '2016-1431', '2016-1432', '2016-1438', '2017-2121'];
@@ -133,39 +290,61 @@ for projNum, studyData in dataset.items():
         dataset[projNum]['mapping'] = {};
 
         # Generate a mapping between multiple DDs, SDDs, and Data files
-        if (len(dataset[projNum]['data']) == 1) and (len(studyData['dd']) == 1):
-            dataset[projNum]['mapping'][studyData['dd'][0]] = [dataset[projNum]['data'][0]];
+        if (len(dataset[projNum]['data']) == 1) and (len(studyData['dd']) == 1) and (len(studyData['sdd']) == 1):
+            dataset[projNum]['mapping'][studyData['dd'][0]] = [dataset[projNum]['data'][0], dataset[projNum]['sdd'][0]];
         else:
             dataCopy = dataset[projNum]['data'].copy();
+            sddCopy = dataset[projNum]['sdd'].copy();
             for ddPath in studyData['dd']:
-                mapping = [];
+                dataMapping = [];
 
                 # find the corresponding file
                 potDataPath = ddPath.split("DDCB");
                 if(len(potDataPath) != 2):
                     print("Bad DD filename " + ddPath);
                     sys.exit(0);
-                potDataPath = potDataPath[0] + "DATA.csv"
+                potDataPath = potDataPath[0] + "DATA.csv";
+                sddDataPath = "SDD-" + projNum + ".xlsx";
+                print("-------------------")
+                print(projNum)
+                print(sddDataPath)
+                print("-------------------")
 
                 # check to make sure it exists
                 if(potDataPath in dataCopy):
-                    mapping.append(potDataPath);
+                    dataMapping.append(potDataPath);
                     dataCopy.remove(potDataPath);
                 else:
                     print("Missing data filename " + potDataPath);
                     print("Data file list " + str(dataset[projNum]['data']));
                     sys.exit(0);
 
-                dataset[projNum]['mapping'][ddPath] = mapping;
+                # check to make sure it exists
+                if(sddDataPath in sddCopy):
+                    dataMapping.append(sddDataPath);
+                    sddCopy.remove(sddDataPath);
+                else:
+                    print("Missing sdd filename " + sddDataPath);
+                    print("SDD file list " + str(dataset[projNum]['sdd']));
+                    sys.exit(0);
+
+                dataset[projNum]['mapping'][ddPath] = dataMapping;
 
             if len(dataCopy) != 0:
                 print("Left over data file " + str(dataCopy));
                 sys.exit(0);
 
+            if len(sddCopy) != 0:
+                print("Left over sdd file " + str(sddCopy));
+                sys.exit(0);
+
+print(dataset[projNum]['mapping']);
+print("done!");
+sys.exit(0);
     # Check that Dataset is valid for a DD
-    for ddPath, maplist in dataset[projNum]['mapping'].items():
-        report = pythonIO.validatData(ddPath, maplist[0]);
-        sys.exit(0);
+    # for ddPath, maplist in dataset[projNum]['mapping'].items():
+    #     report = pythonIO.validatData(ddPath, maplist[0]);
+    #     sys.exit(0);
 
 
         # for ddPath in studyData['dd']:

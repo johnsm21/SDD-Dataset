@@ -222,7 +222,7 @@ public class DataDictionary {
 	 * @param col
 	 * @return
 	 */
-	private static String getCell(Row r, int col) {
+	static String getCell(Row r, int col) {
 		/*
 		try {
 			// System.out.println(r.getCell(col).getStringCellValue());
