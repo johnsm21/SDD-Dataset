@@ -13,13 +13,17 @@ import data.DataDictionary.Datum;
 import data.Report;
 import data.SDDVariable;
 import data.SDDVariable.SDDVarType;
+import rules.RUleSDDVarAttributeOrEntity;
 import rules.RuleCategoricalMustHaveCategories;
 import rules.RuleDDMustHaveDescription;
 import rules.RuleDDMustHaveGoodDescription;
 import rules.RuleDDMustHaveVarName;
 import rules.RuleDDMustNotHaveMisspelling;
 import rules.RuleDDMustNotHaveUnknownVarType;
+import rules.RuleSDDMutualExclusiveCols;
+import rules.RuleSDDRecommendedCols;
 import rules.RuleSDDType;
+import rules.RuleSDDVariableOrphan;
 import rules.RuleUniqueName;
 import validation.DDRule;
 import validation.SDDRule;
@@ -38,10 +42,11 @@ public final class PythonIO {
 				new RuleDDMustHaveGoodDescription(), new RuleDDMustNotHaveMisspelling()};
 		_ddv = new DDValidator(rules);
 		
-		OntologyDB onto = new OntologyDB("http://localhost:3030/Ontologies/");
+		OntologyDB onto = new OntologyDB("http://localhost:3030/ontologies/");
 		
 		
-		SDDRule[] sddRules = {new RuleUniqueName(), new RuleSDDType(onto)
+		SDDRule[] sddRules = {new RuleUniqueName(), new RuleSDDType(onto), new RuleSDDMutualExclusiveCols(),
+				new RuleSDDVariableOrphan(), new RuleSDDRecommendedCols(), new RUleSDDVarAttributeOrEntity()
 		
 		};
 		_sddv = new SDDValidator(sddRules);

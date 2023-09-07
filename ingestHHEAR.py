@@ -128,31 +128,33 @@ pythonIO = PythonIOClass();
 
 
 # Check that SDD Valid
+studyCount = 0
 for projNum, studyData in dataset.items():
+    studyCount = studyCount + 1
     for sddPath in studyData['sdd']:
         print('----------------------');
+        print('studyCount = ' + str(studyCount))
         print(projNum + ': ' + sddPath);
 
         # Get Report
         report = pythonIO.validatSDD(sddPath);
-        if report.isValid():
-            # print warning if no errors
-            if report._warnings.size() > 0:
-                print('Warnings:');
-                for i in range(report._warnings.size()):
-                    print(printCellProv(report._warnings.get(i)));
-                sys.exit(0); # stop running
+        print('Warnings:');
+        for i in range(report._warnings.size()):
+            print(printCellProv(report._warnings.get(i)));
 
-        else: # Print errors if we find any
-            print('Errors found:');
-            for i in range(report._errors.size()):
-                print(printCellProv(report._errors.get(i)));
 
-            sys.exit(0); # stop running
+
+        # Print errors if we find any
+        print('Errors found:');
+        for i in range(report._errors.size()):
+            print(printCellProv(report._errors.get(i)));
 
 
         print('----------------------');
-        sys.exit(0);
+
+        if report._errors.size() > 0:
+            sys.exit(0);
+
 
 sys.exit(0);
 

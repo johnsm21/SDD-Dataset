@@ -90,5 +90,12 @@ def getListOfVars(strData):
     vars = strData.split(',');
     return [x.strip() for x in vars];
 
+# https://stackoverflow.com/questions/23861680/convert-spreadsheet-number-to-column-letter
+# Convert col number to excel letter
+def n2a(n):
+    d, m = divmod(n,26) # 26 is the number of ASCII letters
+    return '' if n < 0 else n2a(d-1)+chr(m+65) # chr(65) = 'A'
+
+
 def printCellProv(cellProv):
-    return '(' + cellProv._sheetName + ', ' + str(cellProv._rowIndex) + ', ' + str(cellProv._colIndex) + '): ' + cellProv._annotation
+    return '(' + cellProv._sheetName + ', ' +  n2a(cellProv._colIndex) + str(cellProv._rowIndex + 1) + '): ' + cellProv._annotation

@@ -15,8 +15,6 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import data.DataDictionary.Datum;
-
 public class SemanticDataDictionary {
 	private final static String _sheetKey = "dictionary mapping";
 	private final static String _prefixKey = "prefixes";
@@ -31,6 +29,7 @@ public class SemanticDataDictionary {
 	private final static String _relationKey = "relation";
 	private final static String _inrelationKey = "inrelationto";
 	private final static String _derivedKey = "wasderivedfrom";
+	private final static String _generatedKey = "wasgeneratedby";
 	
 	private final static String _prefixColKey = "prefix";
 	private final static String _uriKey = "uri";
@@ -47,6 +46,7 @@ public class SemanticDataDictionary {
 	private int _relationCol = -1;
 	private int _inrelationCol = -1;
 	private int _derivedCol = -1;
+	private int _generatedCol = -1;
 	
 	private String _prefixSheetName;
 	private int _prefixCol = -1;
@@ -141,7 +141,7 @@ public class SemanticDataDictionary {
 					+ _uriCol + " in " + sddPath);
 		}
 		
-		System.out.println("Found data dictionary columns: _prefixCol = " + _prefixCol + ", _uriCol = " 
+		System.out.println("Found semantic data dictionary columns: _prefixCol = " + _prefixCol + ", _uriCol = " 
 				+ _uriCol + " in " + sddPath);
 		
 		while(rowIt.hasNext()) {
@@ -154,7 +154,7 @@ public class SemanticDataDictionary {
 
 			}
 		}
-		System.out.println(_prefixMap);
+		// System.out.println(_prefixMap);
 		
 		
 		
@@ -228,33 +228,39 @@ public class SemanticDataDictionary {
 					keyCount++;
 					break;
 					
+				case _generatedKey:
+					_generatedCol = i;
+					keyCount++;
+					break;
+					
 				default:
 			}
 			i++;
 		}
 		
-		if( keyCount > 10) {
+		if( keyCount > 11) {
 			workbook.close();
 			file.close();
 			throw new SemanticDataDictionaryException("Found too many SDD columns: columnCol = " + _columnCol 
 					+ ", attCol = " + _attCol + ", _attOfCol = " + _attOfCol + ", _unitCol = " + _unitCol + ", _timeCol = " + _timeCol
 					+ ", _entityCol = " + _entityCol + ", _roleCol = " + _roleCol + ", _relationCol = " + _relationCol + ", _inrelationCol = " + _inrelationCol
-					+ ", _derivedCol = " + _derivedCol + " in " + sddPath);
+					+ ", _derivedCol = " + _derivedCol +  ", _generatedCol = " + _generatedCol + " in " + sddPath);
 		}
 		
-		if( (_columnCol < 0) || (_attCol < 0) || (_attOfCol < 0)|| (_unitCol < 0)|| (_timeCol < 0)|| (_entityCol < 0)|| (_roleCol < 0)|| (_relationCol < 0)|| (_inrelationCol < 0)|| (_derivedCol < 0)) {
+		if( (_columnCol < 0) || (_attCol < 0) || (_attOfCol < 0)|| (_unitCol < 0)|| (_timeCol < 0)|| (_entityCol < 0)|| (_roleCol < 0)
+				|| (_relationCol < 0)|| (_inrelationCol < 0)|| (_derivedCol < 0)|| (_generatedCol < 0)) {
 			workbook.close();
 			file.close();
-			throw new SemanticDataDictionaryException("Couldn't find data dictionary columns: columnCol = " + _columnCol 
+			throw new SemanticDataDictionaryException("Couldn't find semantic data dictionary columns: columnCol = " + _columnCol 
 					+ ", attCol = " + _attCol + ", _attOfCol = " + _attOfCol + ", _unitCol = " + _unitCol + ", _timeCol = " + _timeCol
 					+ ", _entityCol = " + _entityCol + ", _roleCol = " + _roleCol + ", _relationCol = " + _relationCol + ", _inrelationCol = " + _inrelationCol
-					+ ", _derivedCol = " + _derivedCol + " in " + sddPath);
+					+ ", _derivedCol = " + _derivedCol +  ", _generatedCol = " + _generatedCol + " in " + sddPath);
 		}
 		
-		System.out.println("Found data dictionary columns: columnCol = " + _columnCol 
+		System.out.println("Found semantic data dictionary columns: columnCol = " + _columnCol 
 				+ ", attCol = " + _attCol + ", _attOfCol = " + _attOfCol + ", _unitCol = " + _unitCol + ", _timeCol = " + _timeCol
 				+ ", _entityCol = " + _entityCol + ", _roleCol = " + _roleCol + ", _relationCol = " + _relationCol + ", _inrelationCol = " + _inrelationCol
-				+ ", _derivedCol = " + _derivedCol + " in " + sddPath);
+				+ ", _derivedCol = " + _derivedCol +  ", _generatedCol = " + _generatedCol + " in " + sddPath);
 		
 		_variables = new ArrayList<SDDVariable>();
 		_sddRowTranslator = new HashMap<Integer, Integer>();
@@ -269,7 +275,8 @@ public class SemanticDataDictionary {
 					
 					_variables.add(new SDDVariable(name, DataDictionary.getCell(row, _attCol), DataDictionary.getCell(row, _attOfCol), DataDictionary.getCell(row, _unitCol), 
 							DataDictionary.getCell(row, _timeCol), DataDictionary.getCell(row, _entityCol), DataDictionary.getCell(row, _roleCol), 
-							DataDictionary.getCell(row, _relationCol), DataDictionary.getCell(row, _inrelationCol), DataDictionary.getCell(row, _derivedCol), _prefixMap));
+							DataDictionary.getCell(row, _relationCol), DataDictionary.getCell(row, _inrelationCol), DataDictionary.getCell(row, _derivedCol), 
+							DataDictionary.getCell(row, _generatedCol), _prefixMap));
 					_sddRowTranslator.put(_variables.size()-1, row.getRowNum());
 				}
 			}
@@ -281,7 +288,7 @@ public class SemanticDataDictionary {
 		}
 		
 		
-		System.out.println(_variables);
+		// System.out.println(_variables);
 		
 		// Close the Workbook
 		workbook.close();
@@ -290,7 +297,7 @@ public class SemanticDataDictionary {
 	
 	public CellProv[] getProv(String varName, SDDDatum d) {
 		List<CellProv> cl = new ArrayList<CellProv>();
-		
+				
 		for(int i=0; i<_variables.size(); i++) {
 			SDDVariable v = _variables.get(i);
 			if(v.getName().equals(varName)) {
@@ -325,6 +332,9 @@ public class SemanticDataDictionary {
 						break;
 					case wasDerivedFrom:
 						index = _derivedCol;
+						break;
+					case wasGeneratedBy:
+						index = _generatedCol;
 					
 				}
 				
@@ -336,6 +346,6 @@ public class SemanticDataDictionary {
 	}
 	
 	public enum SDDDatum {
-	    name, attribute, attributeOf, unit, time, entity, role, relation, inRelationTo, wasDerivedFrom
+	    name, attribute, attributeOf, unit, time, entity, role, relation, inRelationTo, wasDerivedFrom, wasGeneratedBy
 	}
 }

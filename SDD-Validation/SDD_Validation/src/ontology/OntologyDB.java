@@ -9,6 +9,7 @@ import org.apache.commons.io.FileUtils;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.BooleanQuery;
 
 
@@ -24,25 +25,34 @@ public class OntologyDB {
 	
 
 	
-	public boolean isClass(String iri) {
+	public boolean isClass(IRI iri) {
 		String queryString = 
 				"ask { \n"
-				+ "?className a <http://www.w3.org/2002/07/owl#Class>. \n"
+				+ "graph ?g { \n"
+				+ "{ ?className a* <http://www.w3.org/2002/07/owl#Class>} \n"
+				+ "UNION \n"
+				+ "{ ?className a* <http://semanticscience.org/resource/SIO_000074>} \n"
+				+ "}"
 				+ "}";
-		queryString = queryString.replace("?className", "<" + iri + ">");
-		
+		queryString = queryString.replace("?className", "<" + iri.stringValue() + ">");
+		// System.out.println(queryString);
 		try (RepositoryConnection conn = _model.getConnection()) {
 			BooleanQuery boolQuery = conn.prepareBooleanQuery(queryString);
 			return boolQuery.evaluate();
 		}
 	}
 	
-	public boolean isProperty(String iri) {
+	public boolean isProperty(IRI iri) {
 		String queryString = 
 				"ask { \n"
-				+ "?className a <http://www.w3.org/2002/07/owl#DatatypeProperty>. \n"
+				+ "graph ?g { \n"
+				+ "{ ?className a* <http://www.w3.org/2002/07/owl#DatatypeProperty>} \n"
+				+ "UNION \n"
+				+ "{ ?className a* <http://www.w3.org/2002/07/owl#ObjectProperty>} \n"
+				+ "}"
 				+ "}";
-		queryString = queryString.replace("?className", "<" + iri + ">");
+		
+		queryString = queryString.replace("?className", "<" + iri.stringValue() + ">");
 		try (RepositoryConnection conn = _model.getConnection()) {
 			BooleanQuery boolQuery = conn.prepareBooleanQuery(queryString);
 			return boolQuery.evaluate();

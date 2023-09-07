@@ -2,6 +2,7 @@ package data;
 
 import java.util.List;
 import java.util.Map;
+
 import java.util.ArrayList;
 
 public class SDDVariable {
@@ -17,11 +18,12 @@ public class SDDVariable {
 	public List<String> _relat; // iri
 	public List<String> _inRelat; // implicit
 	public List<String> _wasDeriv; // implicit
+	public List<String> _wasGener; // implicit
 	
 	
 	public SDDVariable(String colName, String attribute, String attributeOf, String unit, 
 			String time, String entity, String role, String relation, String inRelationTo, 
-			String wasDerivedFrom, Map<String, String> prefixMap) throws VariableException{
+			String wasDerivedFrom, String wasGeneratedBy, Map<String, String> prefixMap) throws VariableException{
 		
 		_name = colName.strip(); // will never be null, we throw away null variables
 		
@@ -49,6 +51,7 @@ public class SDDVariable {
 		_relat = parseCell(relation, prefixMap);
 		_inRelat = parseCell(inRelationTo, prefixMap);
 		_wasDeriv = parseCell(wasDerivedFrom, prefixMap);
+		_wasGener = parseCell(wasGeneratedBy, prefixMap);
 		
 	}
 	
@@ -59,36 +62,37 @@ public class SDDVariable {
 				String cleanCell = cell.strip();
 				// System.out.println(cleanCell);
 				
-				// Check to see if we can expand
-				if(cleanCell.contains(":")) {
-					String[] iri = cleanCell.split(":");
-					
-					if(iri.length != 2) {
-						throw new VariableException("bad iri " + cleanCell);
-					}
-					
-					if(!prefixMap.containsKey(iri[0])) {
-						throw new VariableException("missing ontology " + iri[0]);
-					}
-					
-					cleanCell = prefixMap.get(iri[0]) + iri[1];
+				// Check if its a we are an iri						
+				if(cleanCell.startsWith("http")) {
 					cells.add(cleanCell);
 				}
 				else {
-					// Check if its a variable
-					if(cleanCell.startsWith("??")) {
-						cleanCell = cleanCell.substring(2);
+					// Check to see if we have a prefix we can expand
+					if(cleanCell.contains(":")) {
+						String[] iri = cleanCell.split(":");
+						
+						if(iri.length != 2) {
+							throw new VariableException("bad iri " + cleanCell);
+						}
+						
+						if(!prefixMap.containsKey(iri[0])) {
+							throw new VariableException("missing ontology " + iri[0]);
+						}
+						
+						cleanCell = prefixMap.get(iri[0]) + iri[1];
 						cells.add(cleanCell);
 					}
 					else {
-						// Check if its a we are an iri
-						if(cleanCell.startsWith("http")) {
+						// Check if its a variable
+						if(cleanCell.startsWith("??")) {
+							// cleanCell = cleanCell.substring(2);
 							cells.add(cleanCell);
 						}
 						else {
-							// We have text
+							// We have variable, text or an empty cell
 							if(!cleanCell.isEmpty()) {
-								throw new VariableException("SDD bad data type [" + cleanCell + "]");
+								cells.add(cleanCell);
+								// throw new VariableException("SDD bad data type [" + cleanCell + "]");
 							}
 						}
 					}
@@ -103,7 +107,7 @@ public class SDDVariable {
 	public String toString(){
 		String base = _name + ": attribute=" + _att + ", attributeOf=" + _attOf + ", unit=" + _unit
 				+ ", time=" + _time + ", entity=" + _entity + ", role=" + _role + ", relation=" + _relat
-				+ ", inRelationTo=" + _inRelat + ", wasDerivedFrom=" + _wasDeriv;
+				+ ", inRelationTo=" + _inRelat + ", wasDerivedFrom=" + _wasDeriv+ ", wasGeneratedBy=" + _wasGener;
 		
 		if(_type == SDDVarType.implicit) {
 			base = "??" + base;

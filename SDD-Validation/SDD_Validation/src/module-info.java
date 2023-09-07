@@ -18,6 +18,8 @@ module SDD_Validation {
 	requires rdf4j.http.client;
 	requires rdf4j.query;
 	requires rdf4j.common.exception;
+	requires rdf4j.model.api;
+	requires rdf4j.model;
 //	requires org.apache.jena.core;
 //	requires org.apache.jena.arq;
 //	requires org.apache.jena.rdfconnection;
