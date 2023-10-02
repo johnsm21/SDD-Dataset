@@ -31,7 +31,7 @@ public class RuleSDDType implements SDDRule{
 
 	@Override
 	public Severity getSeverity() {
-		return Severity.warning; //error
+		return Severity.error;
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public class RuleSDDType implements SDDRule{
 				checkForClass(iriText, sdd, var, res, SDDDatum.unit);
 			}
 			
-			// Check the time for variables
+			// Check the time fhttps://marketplace.eclipse.org/marketplace-client-intro?mpc_install=19495or variables
 			for(String iriText: var._time) {
 				checkForVars(iriText, sdd, var, res, SDDDatum.time);
 			}
@@ -89,7 +89,7 @@ public class RuleSDDType implements SDDRule{
 			// Check the wasGeneratedBy for variables
 			for(String iriText: var._wasGener) {
 				// looks like classes are also valid?
-				// checkForVars(iriText, sdd, var, res, SDDDatum.wasGeneratedBy);
+				checkForVars(iriText, sdd, var, res, SDDDatum.wasGeneratedBy);
 			}
 		}
 		

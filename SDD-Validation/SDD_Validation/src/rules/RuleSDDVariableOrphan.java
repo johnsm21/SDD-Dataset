@@ -64,7 +64,7 @@ public class RuleSDDVariableOrphan implements SDDRule{
 			// wasGeneratedBy
 			for(String varText : var._wasGener) {
 				// looks like classes are also valid?
-				// checkVarUsage(varText, sdd, var, varUsage, res, SDDDatum.wasGeneratedBy);
+				checkVarUsage(varText, sdd, var, varUsage, res, SDDDatum.wasGeneratedBy);
 			}
 		}
 

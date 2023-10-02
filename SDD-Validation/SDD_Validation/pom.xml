@@ -33,6 +33,7 @@
 <!--		    <artifactId>jazzy-core</artifactId>-->
 <!--		    <version>0.5.2</version>-->
 <!--		</dependency>-->
+
 <dependency>
     <groupId>net.sf.jazzy</groupId>
     <artifactId>jazzy</artifactId>

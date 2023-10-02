@@ -20,7 +20,7 @@ public class RuleSDDRecommendedCols implements SDDRule{
 
 	@Override
 	public Severity getSeverity() {
-		return Severity.warning;
+		return Severity.error;
 	}
 
 	@Override

@@ -7,3 +7,7 @@ output
 __pycache__
 *.class
 ~$*
+dataset.pckl
+data/The-Cancer-Genomic-Atlas
+data/nhanes-dd/
+data/nhanes/
