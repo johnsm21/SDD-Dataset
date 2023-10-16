@@ -11,6 +11,7 @@ import data.SemanticDataDictionary;
 import data.SemanticDataDictionaryException;
 import data.DataDictionary.Datum;
 import data.Report;
+import data.SDDAnalyzer;
 import data.SDDVariable;
 import data.SDDVariable.SDDVarType;
 import rules.RUleSDDVarAttributeOrEntity;
@@ -35,6 +36,7 @@ public final class PythonIO {
 	
 	private DDValidator _ddv;
 	private SDDValidator _sddv;
+	private OntologyDB _onto;
 	public PythonIO() throws FileNotFoundException, IOException {
 		
 		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), 
@@ -42,10 +44,10 @@ public final class PythonIO {
 				new RuleDDMustHaveGoodDescription(), new RuleDDMustNotHaveMisspelling()};
 		_ddv = new DDValidator(rules);
 		
-		OntologyDB onto = new OntologyDB("http://localhost:3030/ontologies/");
+		_onto = new OntologyDB("http://localhost:3030/ontologies/sparql");
 		
 		
-		SDDRule[] sddRules = {new RuleUniqueName(), new RuleSDDType(onto), new RuleSDDMutualExclusiveCols(),
+		SDDRule[] sddRules = {new RuleUniqueName(), new RuleSDDType(_onto), new RuleSDDMutualExclusiveCols(),
 				new RuleSDDVariableOrphan(), new RuleSDDRecommendedCols(), new RUleSDDVarAttributeOrEntity()
 		
 		};
@@ -82,6 +84,11 @@ public final class PythonIO {
 			r.addMessage( new CellProv[]{c}, Report.Severity.error);
 			return r;
 		}		
+	}
+	
+	public SDDAnalyzer getAnalyzer(String sddPath) throws IOException, SemanticDataDictionaryException {
+		SemanticDataDictionary sdd = new SemanticDataDictionary(sddPath);
+		return new SDDAnalyzer(sdd, _onto);
 	}
 	
 	public String test(String ddPath) {
