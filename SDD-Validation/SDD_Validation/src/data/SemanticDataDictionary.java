@@ -8,12 +8,15 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import data.SDDVariable.SDDVarType;
 
 public class SemanticDataDictionary {
 	private final static String _sheetKey = "dictionary mapping";
@@ -293,6 +296,34 @@ public class SemanticDataDictionary {
 		// Close the Workbook
 		workbook.close();
 		file.close();
+	}
+	public String[] generateCTATarget(Data data) throws Exception {
+		if(data._data.keySet().size() != 1) {
+			throw new Exception("Multiple sheets " + data._data.keySet() + " in the table " + data._dataPath);
+		}
+		
+		// Get ordered set of headers from table data
+		String sheetname = data._data.keySet().iterator().next();
+		Set<String> headers = data._data.get(sheetname).keySet();
+		String tableName = data.getTableName();
+		
+		// Iterate over all column headers
+		int i = 0;
+		List<String> result = new ArrayList<String>();
+		for(String colName : headers) {
+			// Find the SDD variable
+			for(SDDVariable var : _variables) {
+				if(var._name.equals(colName)) {
+					if(var._att.size() > 0) {
+						result.add(tableName + "," + i + "," +var._att.get(0));
+					}
+					break; // stop looking
+				}
+			}
+			i++;
+		}
+		
+		return result.toArray(new String[0]);
 	}
 	
 	public CellProv[] getProv(String varName, SDDDatum d) {

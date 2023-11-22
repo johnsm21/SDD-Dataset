@@ -48,6 +48,47 @@ public class OntologyDB {
 	}
 	
 	
+	public List<String> getClassLabel(IRI iri) throws Exception {
+		List<String> arl = new ArrayList<String>();
+		
+		// Generate Query String
+		String queryString = 
+				  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+				+ "PREFIX dcterms: <http://purl.org/dc/terms/> \n"
+				+ "PREFIX iao: <http://purl.obolibrary.org/obo/IAO_> \n"
+				+ "PREFIX skos: <http://www.w3.org/2004/02/skos/core#> \n"
+				+ "select distinct ?label \n"
+				+ "where { \n"
+				+ "	graph ?g { \n"
+				+ "		?variable	rdfs:label	?label	. \n"
+				+ "	} \n"
+				+ "}";
+		
+		queryString = queryString.replace("?variable", "<" + iri.stringValue() + ">");
+		// System.out.println(queryString);
+		queryString = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString());
+		
+		OkHttpClient client = new OkHttpClient();
+		Request request = new Request.Builder()
+				.url(_url + "?query=" + queryString)
+				.build();
+
+		try (Response response = client.newCall(request).execute()) {
+			String docString = response.body().string();
+			// System.out.println(docString);
+			List<Map<String, String>> parsed = parseHttpResponse(docString);
+			
+			// System.out.println(parsed);
+			
+			for(Map<String, String> parse : parsed) {
+				arl.add(parse.get("label"));
+			}
+		}
+	
+		
+		return arl;
+	}
+	
 	public List<String> getOntologyOldFashion(IRI iri) throws Exception {
 		List<String> arl = new ArrayList<String>();
 		

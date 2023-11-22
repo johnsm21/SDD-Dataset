@@ -111,5 +111,15 @@ def splitPercent(trainP, testP, dataset, weightPrefix):
 
 [train, test] = splitPercent(70, 30, activeDataset, 'attCount');
 
-# print(train);
-# print(test);
+print(train);
+print(test);
+
+
+print('Saving Dataset');
+f = open('test.pckl', 'wb')
+pickle.dump(test, f)
+f.close()
+
+f = open('train.pckl', 'wb')
+pickle.dump(train, f)
+f.close()

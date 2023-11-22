@@ -2,6 +2,11 @@ package io;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
+
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import data.DataDictionaryException;
 import data.CellProv;
@@ -37,6 +42,9 @@ public final class PythonIO {
 	private DDValidator _ddv;
 	private SDDValidator _sddv;
 	private OntologyDB _onto;
+	private ValueFactory _vf;
+	
+	
 	public PythonIO() throws FileNotFoundException, IOException {
 		
 		DDRule[] rules = {new RuleUniqueName(), new RuleDDMustHaveVarName(), new RuleDDMustHaveDescription(), 
@@ -52,8 +60,14 @@ public final class PythonIO {
 		
 		};
 		_sddv = new SDDValidator(sddRules);
+		
+		_vf = SimpleValueFactory.getInstance();
 	}
 	
+	public List<String> getClassLabel(String iri) throws Exception{
+		return _onto.getClassLabel(_vf.createIRI(iri));
+		
+	}
 	
 	public static String[] validateSDD(String ddPath, String sddPath) {
 		return new String[0];
