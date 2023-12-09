@@ -6,8 +6,8 @@ import jnius_config;
 jnius_config.set_classpath('.', '/Users/mjohnson/Projects/SDD-Dataset/SDD-Validation/SDD_Validation/target/SDD_Validation-0.0.1-SNAPSHOT-jar-with-dependencies.jar');
 from jnius import autoclass;
 
-datasetFile = 'data/SDD-Dataset/2023-10-30/train.pckl';
-outputFile = 'data/SDD-Dataset/2023-10-30/train_sddgen_data.csv';
+datasetFile = 'data/SDD-Dataset/2023-10-30/test.pckl';
+outputFile = 'data/SDD-Dataset/2023-10-30/test_sddgen_data.csv';
 
 # Load dataset
 f = open(datasetFile, 'rb');
@@ -51,7 +51,7 @@ for datum in dataset:
                         print('No label found for ' + sddVar._att[0]);
                         sys.exit(1);
 
-                    outputFile.write(datum['projNum'] + "," + var._name + "," + var._desc + "," + sddVar._att[0] + "," + labels[0] + ",");
+                    outputFile.write(datum['projNum'] + "," + var._name + ",\"" + var._desc + "\"," + sddVar._att[0] + "," + labels[0] + ",");
 
                     first = True;
                     for d in datum['ontList']:
