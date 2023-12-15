@@ -69,6 +69,12 @@ public final class PythonIO {
 		
 	}
 	
+	public String[] getClassLabels(String graph) throws Exception{
+		List<String> res = _onto.getClassLabels(_vf.createIRI(graph));
+		return res.toArray(new String[0]);
+	}
+
+	
 	public static String[] validateSDD(String ddPath, String sddPath) {
 		return new String[0];
 		

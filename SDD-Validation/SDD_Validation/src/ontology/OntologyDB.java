@@ -47,6 +47,48 @@ public class OntologyDB {
 		_model.init();
 	}
 	
+	public List<String> getClassLabels(IRI graph) throws Exception {
+		List<String> arl = new ArrayList<String>();
+		
+		// Generate Query String
+		String queryString = 
+				  "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \n"
+				+ "PREFIX owl: <http://www.w3.org/2002/07/owl#> \n"
+				+ "select distinct ?variable ?label \n"
+				+ "where { \n"
+				+ "	graph ?g { \n"
+				+ "     { ?variable a owl:Class } \n"
+				+ "      UNION \n"
+				+ "     { ?variable a rdfs:Class } \n" 
+				+ "		?variable	rdfs:label	?label	. \n"
+				+ "	} \n"
+				+ "}";
+		
+		queryString = queryString.replace("?g", "<" + graph.stringValue() + ">");
+		// System.out.println(queryString);
+		queryString = URLEncoder.encode(queryString, StandardCharsets.UTF_8.toString());
+		
+		OkHttpClient client = new OkHttpClient();
+		Request request = new Request.Builder()
+				.url(_url + "?query=" + queryString)
+				.build();
+
+		try (Response response = client.newCall(request).execute()) {
+			String docString = response.body().string();
+			// System.out.println(docString);
+			List<Map<String, String>> parsed = parseHttpResponse(docString);
+			
+			// System.out.println(parsed);
+			
+			for(Map<String, String> parse : parsed) {
+				arl.add(parse.get("variable"));
+				arl.add(parse.get("label"));
+			}
+		}
+	
+		
+		return arl;
+	}
 	
 	public List<String> getClassLabel(IRI iri) throws Exception {
 		List<String> arl = new ArrayList<String>();
