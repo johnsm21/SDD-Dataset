@@ -29,6 +29,7 @@ pythonIO = PythonIOClass();
 # validate SDD
 activeDataset = [];
 studyCount = 0
+sddCount = 0;
 for projNum, studyData in dataset.items():
     studyCount = studyCount + 1
 
@@ -53,6 +54,7 @@ for projNum, studyData in dataset.items():
 
             print('Attribute Count: ' + str(attCount));
             print('Ontologies: ' + str(ontList));
+            sddCount = sddCount + 1;
 
             # sys.exit(0);
 
@@ -114,12 +116,13 @@ def splitPercent(trainP, testP, dataset, weightPrefix):
 print(train);
 print(test);
 
+print('SDD Count: ' + str(sddCount));
 
-print('Saving Dataset');
-f = open('test.pckl', 'wb')
-pickle.dump(test, f)
-f.close()
-
-f = open('train.pckl', 'wb')
-pickle.dump(train, f)
-f.close()
+# print('Saving Dataset');
+# f = open('test.pckl', 'wb')
+# pickle.dump(test, f)
+# f.close()
+#
+# f = open('train.pckl', 'wb')
+# pickle.dump(train, f)
+# f.close()
