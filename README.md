@@ -5,7 +5,7 @@ The SDD-Dataset [1] is composed of complex tables, data dictionaries, and semant
 Each group of studies has a `study-manifest.xlsx`, which lists all the files associated with each study, labels the file type (Data, DD, SDD), and includes any DOIs. Studies have two combinations of files: [X Data files, X DD files, X SDD files]- one set of files linked to each other and [1 Data file, X DD files, X SDD files]- one table with several linked DDs and SDDs.
 
 ## HHEAR Studies
-The fully cleaned datasets for NHANES and TCGA are included; however, HHEAR data can not be published outside of the data repository. To access the original files, users can register for the HHEAR data repository [here](https://hheardatacenter.mssm.edu/Register/Terms). Once signed up, anyone with DOIs in the `HHEAR-Studies/2023-06-16/study-manifest.xlsx` file can access the raw data. Users can then use validation [tools](https://github.com/johnsm21/SDD-Validation) to clean this data.
+The fully cleaned datasets for NHANES and TCGA are included; however, HHEAR data can not be published outside of the data repository. To access the original files, users can register for the HHEAR data repository [here](https://hheardatacenter.mssm.edu/Account/Login). Once signed up, anyone with DOIs in the `HHEAR-Studies/2023-06-16/study-manifest.xlsx` file can access the raw data. Users can then use validation [tools](https://github.com/johnsm21/SDD-Validation) to clean this data.
 
 ## Ontologies
 The `Ontologies` folder contains a copy of each ontology against which the dataset is aligned. The column-type alignment problem that the paper [1] used to compare algorithms only uses a subset of these.
